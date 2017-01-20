@@ -146,3 +146,18 @@ export const hoodToAnnotations = (feature, annotationSettings) => {
     [mergeSettings(coords)];
 };
 
+const seededRandom = (seed) => {
+  const x = Math.sin(seed) * 10000;
+  return x - Math.floor(x);
+};
+
+export const binduMapBox = (text) => {
+  // sums the ascii values of each character in the stat to use as seed
+  let seed = text.split('').reduce( function(sum,item,i) { return sum + item.charCodeAt()*i+2 },0);
+  const color = {
+    r: parseInt(seededRandom(seed)*100+50),
+    g: parseInt(seededRandom(++seed)*100+50),
+    b: parseInt(seededRandom(++seed)*100+100)
+  };
+  return '#'+color.r.toString(16)+color.g.toString(16)+color.b.toString(16);
+};
