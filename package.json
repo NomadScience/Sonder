@@ -1,0 +1,120 @@
+{
+  "name": "Sonder",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node node_modules/react-native/local-cli/cli.js start",
+    "lint": "standard --verbose | snazzy",
+    "lintdiff": "git diff --name-only --cached --relative | grep '\\.js$' | xargs standard | snazzy",
+    "fixcode": "standard --fix",
+    "clean": "rm -rf $TMPDIR/react-* && watchman watch-del-all && npm cache clean",
+    "clean:android": "cd android/ && ./gradlew clean && cd .. && react-native run-android",
+    "newclear": "rm -rf $TMPDIR/react-* && watchman watch-del-all && rm -rf ios/build/ModuleCache/* && rm -rf node_modules/ && npm cache clean && npm i",
+    "test": "NODE_ENV=production ava",
+    "test:watch": "ava --watch",
+    "coverage": "nyc ava && nyc report --reporter=html && open coverage/index.html || xdg-open coverage/index.html",
+    "tron": "node_modules/.bin/reactotron",
+    "ios:fb:install-sdk": "react-native install react-native-fbsdk",
+    "ios:fb:fetch-frameworks": "mkdir ios/Frameworks && curl -#L https://origincache.facebook.com/developers/resources/?id=facebook-ios-sdk-current.zip | bsdtar -xf- -C ./ios/Frameworks",
+    "ios:fb:setup-sdk": "npm install xcode && curl https://gist.githubusercontent.com/chrisp-fb/ade0baca1391982f97e2fbc0ad73b934/raw/d3d81a38d2465f8e820285a4a5f5656ef5f9c5a9/fbsdk-setup.js | node",
+    "ios:install-fb-auth": "npm run ios:fb:install-sdk && npm run ios:fb:fetch-frameworks && npm run ios:fb:setup-sdk",
+    "android:build": "cd android && ./gradlew assembleRelease",
+    "android:install": "cd android && ./gradlew assembleRelease && ./gradlew installRelease",
+    "android:hockeyapp": "cd android && ./gradlew assembleRelease && puck -submit=auto app/build/outputs/apk/app-release.apk",
+    "android:devices": "$ANDROID_HOME/platform-tools/adb devices",
+    "android:logcat": "$ANDROID_HOME/platform-tools/adb logcat *:S ReactNative:V ReactNativeJS:V",
+    "android:shake": "$ANDROID_HOME/platform-tools/adb devices | grep '\\t' | awk '{print $1}' | sed 's/\\s//g' | xargs -I {} $ANDROID_HOME/platform-tools/adb -s {} shell input keyevent 82",
+    "flow": "flow --show-all-errors"
+  },
+  "dependencies": {
+    "@turf/turf": "^3.7.1",
+    "apisauce": "^0.6.0",
+    "bluebird": "^3.4.7",
+    "cloneextend": "0.0.3",
+    "code42day-vis-why": "^1.1.5",
+    "format-json": "^1.0.3",
+    "lodash": "^4.17.4",
+    "next-frame": "^0.2.3",
+    "nonce": "^1.0.4",
+    "oauthsimple": "0.0.1",
+    "polygon-offset": "^0.3.1",
+    "querystring": "^0.2.0",
+    "querystringify": "0.0.4",
+    "ramda": "^0.22.1",
+    "react": "~15.4.0-rc.4",
+    "react-native": "0.38.0",
+    "react-native-animatable": "^0.6.0",
+    "react-native-config": "^0.1.2",
+    "react-native-device-info": "^0.9.6",
+    "react-native-drawer": "^2.3.0",
+    "react-native-fbsdk": "^0.4.0",
+    "react-native-heading": "^1.0.0",
+    "react-native-i18n": "^0.1.1",
+    "react-native-mapbox-gl": "^5.1.0",
+    "react-native-maps": "^0.11.0",
+    "react-native-popup-dialog": "^0.4.16",
+    "react-native-router-flux": "^3.37.0",
+    "react-native-vector-icons": "^3.0.0",
+    "react-redux": "^4.4.6",
+    "reactotron": "^0.9.0",
+    "redux": "^3.6.0",
+    "redux-logger": "^2.7.4",
+    "redux-persist": "^3.5.0",
+    "redux-saga": "^0.13.0",
+    "reduxsauce": "0.2.0",
+    "seamless-immutable": "^6.3.0"
+  },
+  "devDependencies": {
+    "ava": "^0.17.0",
+    "babel-eslint": "^7.1.1",
+    "babel-preset-env": "^1.1.4",
+    "babel-preset-es2015": "^6.18.0",
+    "enzyme": "^2.6.0",
+    "flow-bin": "0.33.0",
+    "ghooks": "^1.3.2",
+    "husky": "^0.12.0",
+    "mockery": "^2.0.0",
+    "nyc": "^9.0.1",
+    "react-addons-test-utils": "^15.3.1",
+    "react-dom": "^15.4.0",
+    "react-native-mock": "^0.2.8",
+    "reactotron-apisauce": "^1.5.2",
+    "reactotron-react-native": "^1.5.2",
+    "reactotron-redux": "^1.5.2",
+    "reactotron-redux-saga": "^1.5.2",
+    "snazzy": "^5.0.0",
+    "standard": "8.6.0",
+    "standard-flow": "^1.0.0"
+  },
+  "ava": {
+    "files": [
+      "Tests/**/*.js",
+      "!Tests/Setup.js"
+    ],
+    "require": [
+      "babel-register",
+      "babel-polyfill",
+      "react-native-mock/mock",
+      "./Tests/Setup"
+    ],
+    "babel": "inherit"
+  },
+  "standard": {
+    "parser": "babel-eslint",
+    "globals": [
+      "describe",
+      "it",
+      "fetch",
+      "navigator",
+      "__DEV__",
+      "XMLHttpRequest",
+      "FormData",
+      "React$Element"
+    ]
+  },
+  "_config": {
+    "ghooks": {
+      "pre-commit": "if [ -d 'ignite-base' ]; then cd ignite-base; fi; npm run lint"
+    }
+  }
+}
