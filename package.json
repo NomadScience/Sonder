@@ -62,6 +62,7 @@
     "redux-persist": "^3.5.0",
     "redux-saga": "^0.13.0",
     "reduxsauce": "0.2.0",
+    "rtree": "^1.4.2",
     "seamless-immutable": "^6.3.0"
   },
   "devDependencies": {
