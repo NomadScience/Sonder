@@ -13,7 +13,13 @@ import {
 
 import Styles from './Styles/MapViewStyle'
 import Compass from '../Lib/Compass'
-import { hoodToAnnotations, reverseTuples, getPrettyBearing, toTuples } from '../Lib/MapHelpers'
+import { 
+  hoodToAnnotations, 
+  reverseTuples, 
+  getPrettyBearing, 
+  toTuples,
+  binduMapBox,
+} from '../Lib/MapHelpers'
 
 const accessToken = 'pk.eyJ1Ijoic2FsbW9uYXgiLCJhIjoiY2l4czY4dWVrMGFpeTJxbm5vZnNybnRrNyJ9.MUj42m1fjS1vXHFhA_OK_w';
 Mapbox.setAccessToken(accessToken);
@@ -21,6 +27,7 @@ Mapbox.setAccessToken(accessToken);
 const hoods = Compass.getDebugHoods();
 
 class SonderView extends Component {
+  currentHoodColor = '#AA9922';
   state = {
     zoom: 12,
     userTrackingMode: Mapbox.userTrackingMode.follow,
@@ -116,7 +123,7 @@ class SonderView extends Component {
       // fillAlpha: 0.5,
       // alpha: 0.5,
       class: 'hood',
-      fillColor: '#AA2222',
+      fillColor: '#AA9922',
       strokeColor: '#FFFFFF',
       strokeWidth: 10,
       // strokeAlpha: .5,
@@ -129,7 +136,7 @@ class SonderView extends Component {
         // fillAlpha: 0.5,
         // alpha: 0.5,
         class: 'hood',
-        fillColor: '#2222AA',
+        fillColor: binduMapBox(adjacentHood.properties.label),
         strokeColor: '#FFFFFF',
         strokeWidth: 10,
         // strokeAlpha: .5,
@@ -177,6 +184,38 @@ class SonderView extends Component {
 
   render() {
     StatusBar.setHidden(true);
+    const nearestAdjacentHood = (this.state.entities) ? 
+      this.state.entities.hoods.adjacents.sort((a,b) => {
+        return (parseFloat(a.distance) - parseFloat(b.distance));
+      })[0] : 
+      '';
+    const dynamicStyles = StyleSheet.create({
+      currentHood: {
+        position: 'absolute',
+        paddingLeft: 10,
+        paddingRight: 10,
+        right: 20,
+        bottom: 72,
+        fontSize: 32,
+        borderColor: '#AA9922',
+        borderWidth: 1,
+        color: '#AA9922',
+        backgroundColor: '#000000'
+      },
+      adjacentHood: {
+        position: 'absolute',
+        paddingLeft: 10,
+        paddingRight: 10,
+        right: 5,
+        top: 80,
+        fontSize: 20,
+        backgroundColor: '#000000',
+        color: (nearestAdjacentHood && this.state.entities) ? binduMapBox(nearestAdjacentHood.name) : '#ffffff',
+        borderColor: (nearestAdjacentHood && this.state.entities) ? binduMapBox(nearestAdjacentHood.name) : '#ffffff',
+        borderWidth: 1
+      }
+    });
+    const nearestAdjacentHoodLabel = (nearestAdjacentHood && this.state.entities) ? nearestAdjacentHood.name +' ('+nearestAdjacentHood.distance+')' : '';
     return (
       <View style={styles.container}>
         <MapView
@@ -205,6 +244,9 @@ class SonderView extends Component {
         <Text>{this.state.headingIsSupported ?
                 getPrettyBearing(this.state.heading)
                 : "Heading unsupported." }</Text>
+        {this.state.entities ? <Text style={dynamicStyles.currentHood}>{this.state.entities ? 
+              this.state.entities.hoods.current.name : ''}</Text> : null }
+        {this.state.entities ? <Text style={dynamicStyles.adjacentHood}>{nearestAdjacentHoodLabel}</Text> : null }
 
             {/*<Text>{this.state.entities ? 
               JSON.stringify(this.state.entities.hoods) : 
@@ -232,6 +274,12 @@ const mapStateToProps = (state) => {
 }
 
 const styles = StyleSheet.create({
+  currentHood: {
+    position: 'absolute',
+    right: 0,
+    bottom: 0,
+    fontSize: 32
+  },
   container: {
     flex: 1,
     alignItems: 'stretch'
