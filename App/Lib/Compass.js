@@ -26,7 +26,7 @@ import { clone } from 'cloneextend';
 import vis from 'code42day-vis-why';
 import nextFrame from 'next-frame';
 
-import HoodSmith from './HoodSelector';
+import HoodSmith from './HoodSelector'; 
 
 const offset = new Offset();
 
