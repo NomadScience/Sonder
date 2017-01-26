@@ -60,7 +60,19 @@ class Compass {
     this._debugStreets = this.getDebugStreets();
     this._debugHoods = this.getDebugHoods();
     // Delegate hood changes to HoodSmith
-    HoodSmith.onHoodChange((data) => this._onHoodChange(data));
+    HoodSmith.onHoodChange((hoodData) => {
+      // Note: only using Object.assign here to carry over legacy LatLngs, but means they won't actually update on move
+      // (Definitely not going to bother calling mapifyHoods here)
+      // ToDo: replace newHood with currentHood in all onHoodChange refs, make sure its param is called hoodData and not just data
+      const currentHood = hoodData.newHood;
+      const { adjacentHoods } = hoodData;
+      if (this._hoodData) {
+        this._hoodData = Object.assign(this._hoodData, { currentHood, adjacentHoods });
+      } else {
+        this._hoodData = { currentHood, adjacentHoods }
+      }
+      this._onHoodChange(hoodData);
+    });
   }
   getDebugHoods() {
     return FixtureApi.getNeighborhoodBoundaries('San Francisco').data;
@@ -119,6 +131,17 @@ class Compass {
       this._currentPosition = position.coords;
       HoodSmith.refresh(this._currentPosition);
       this._onPositionChange(position); // probably should pass position.coords
+      // ToDo: this allows heading-stationary entity updates, but there's something in the logic that causes it to lag, crash, and suck; fix
+      // Idea: maybe tag-team with headingUpdated, such that it is never called once for subsequent events?
+      // const compassLine = this._compassLine = this.getCompassLine(); // also carried over from headingChange
+      // if (!compassLine || !this._hoodData || this._detectionPending || !this._lastHeading) return; // important debouncer and flow checks
+      // this._detectionPending = true;
+      // this._detectEntities(this._lastHeading).then(entities => {
+      //   this._entities = entities;
+      //   this._onEntitiesDetected(entities);
+      //   this._detectionPending = false;
+      //   // console.tron.log('SPEED: ' + (Date.now()-startTime).toString()+'ms SPREAD: ' + this.__frameCounter.toString()+' frames');
+      // });
     });
 
     ReactNativeHeading.start(opts.minAngle || 1)
@@ -211,8 +234,8 @@ class Compass {
       adjacents.push({
         name: feature.properties.label,
         distance: collisionDistance.toFixed(2) + ' miles',
-        coordinates: feature.geometry.coordinates,
-        feature,
+        // coordinates: feature.geometry.coordinates,
+        // feature,
       });
     }
     const current = {

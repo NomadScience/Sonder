@@ -22,9 +22,9 @@ class NavigationRouter extends Component {
       <Router>
         <Scene key='drawer' component={NavigationDrawer} open={false}>
           <Scene key='drawerChildrenWrapper' navigationBarStyle={Styles.navBar} titleStyle={Styles.title} leftButtonIconStyle={Styles.leftButton} rightButtonTextStyle={Styles.rightButton}>
-            <Scene initial key='welcomeView' hideNavBar={false} component={WelcomeView} />
+            <Scene key='welcomeView' hideNavBar={false} component={WelcomeView} />
             <Scene key='sonderView' component={SonderView} title='Sonder' />
-            <Scene key='sonderDebug' component={SonderDebug} title='Sonder Data Debug' />
+            <Scene initial key='sonderDebug' component={SonderDebug} title='Sonder Data Debug' />
           </Scene>
         </Scene>
       </Router>
